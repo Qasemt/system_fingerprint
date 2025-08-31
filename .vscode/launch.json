@@ -2,14 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "🚀 Run And Debug ",
+      "name": "🚀 Run And Debug",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "env": {
         "APP_ENV": "development"
       },
-      "program": "${workspaceRoot}/main.go",
+      "program": "${workspaceRoot}",   // 👈 تغییر مهم
       "cwd": "${workspaceRoot}",
       "showLog": false
     }
