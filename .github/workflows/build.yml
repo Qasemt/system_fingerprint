@@ -44,9 +44,9 @@ jobs:
     - name: Build application
       run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
-          go build -v -o go-system-fingerprint.exe .
+          go build -v -o system-fingerprint.exe .
         else
-          go build -v -o go-system-fingerprint .
+          go build -v -o system-fingerprint .
         fi
       shell: bash
 
@@ -60,8 +60,8 @@ jobs:
         # مسیر دقیق فایل اجرایی برای آپلود.
         # در ویندوز، فایل .exe و در لینوکس، فایل بدون پسوند آپلود می‌شود.
         path: |
-          go-system-fingerprint.exe
-          go-system-fingerprint
+          system-fingerprint.exe
+          system-fingerprint
         # اگر هیچ فایل اجرایی ساخته نشود، این مرحله با خطا مواجه خواهد شد
         if-no-files-found: error
 
