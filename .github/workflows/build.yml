@@ -1,49 +1,66 @@
+# نام Workflow که در تب Actions گیت‌هاب نمایش داده می‌شود
 name: Go Cross-Platform Build
 
+# این Workflow چه زمانی اجرا می‌شود
 on:
+  # با هر پوش (push) به شاخه main
   push:
     branches: [ "main" ]
+  # با هر درخواست ادغام (pull request) به شاخه main
   pull_request:
     branches: [ "main" ]
 
+# کارهایی (Jobs) که باید انجام شوند
 jobs:
+  # تعریف یک کار به نام build
   build:
+    # نام استراتژی: اجرای این کار برای چند پلتفرم مختلف
     strategy:
+      # تعریف یک ماتریس برای سیستم‌عامل‌ها
       matrix:
-        # تعریف تمام ترکیبات به صورت دستی با include
-        include:
-          - os: ubuntu-latest
-            shell: bash
-            output_name: system-fingerprint
-            goos: linux
+        os: [ubuntu-latest, windows-latest]
 
-          - os: windows-latest
-            shell: pwsh
-            output_name: system-fingerprint.exe
-            goos: windows
-
+    # مشخص کردن ماشینی که این کار روی آن اجرا می‌شود (بر اساس ماتریس بالا)
     runs-on: ${{ matrix.os }}
 
+    # مراحل اجرای کار
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    # مرحله ۱: دریافت کد از ریپازیتوری
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
+    # مرحله ۲: نصب و راه‌اندازی محیط Go
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21' # می‌توانید نسخه Go را تغییر دهید
 
-      - name: Install dependencies
-        run: go mod tidy
+    # مرحله ۳: دانلود و نصب وابستگی‌ها
+    - name: Install dependencies
+      run: go mod tidy
 
-      - name: Build application
-        shell: ${{ matrix.shell }}
-        run: |
-          go build -v -o ${{ matrix.output_name }} .
+    # مرحله ۴: کامپایل (Build) کردن برنامه
+    # نام فایل خروجی را به صورت واضح بر اساس سیستم‌عامل تعیین می‌کنیم
+    - name: Build application
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          go build -v -o system-fingerprint.exe .
+        else
+          go build -v -o system-fingerprint .
+        fi
+      shell: bash
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fingerprint-${{ matrix.os }}
-          path: ${{ matrix.output_name }}
-          if-no-files-found: error
+    # مرحله ۵: آپلود کردن خروجی به عنوان Artifact
+    # این کار به شما اجازه می‌دهد فایل اجرایی را از صفحه Actions دانلود کنید
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        # نام فایل آپلود شده که شامل نام سیستم‌عامل است
+        name: fingerprint-${{ matrix.os }}
+        # مسیر دقیق فایل اجرایی برای آپلود.
+        # در ویندوز، فایل .exe و در لینوکس، فایل بدون پسوند آپلود می‌شود.
+        path: |
+          system-fingerprint.exe
+          system-fingerprint
+        # اگر هیچ فایل اجرایی ساخته نشود، این مرحله با خطا مواجه خواهد شد
+        if-no-files-found: error
