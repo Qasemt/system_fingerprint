@@ -8,6 +8,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            binary_name: system-fingerprint
+            artifact_name: fingerprint-linux
+          - os: windows-latest
+            binary_name: system-fingerprint.exe
+            artifact_name: fingerprint-windows
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -23,28 +30,11 @@ jobs:
         run: go mod tidy
 
       - name: Build application
-        run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            go build -v -o system-fingerprint.exe .
-          else
-            go build -v -o system-fingerprint .
-          fi
-        shell: bash
+        run: go build -v -o ${{ matrix.binary_name }} .
 
-      # ویندوز: آپلود exe
-      - name: Upload artifact (Windows)
-        if: runner.os == 'Windows'
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fingerprint-windows
-          path: system-fingerprint.exe
-          if-no-files-found: error
-
-      # لینوکس: آپلود باینری
-      - name: Upload artifact (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: fingerprint-linux
-          path: system-fingerprint
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.binary_name }}
           if-no-files-found: error
