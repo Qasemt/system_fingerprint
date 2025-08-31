@@ -36,22 +36,32 @@ jobs:
         go-version: '1.21' # می‌توانید نسخه Go را تغییر دهید
 
     # مرحله ۳: دانلود و نصب وابستگی‌ها
-    # این دستور پکیج‌ها را بر اساس فایل go.mod دانلود می‌کند
     - name: Install dependencies
       run: go mod tidy
 
     # مرحله ۴: کامپایل (Build) کردن برنامه
-    # این دستور برنامه را برای سیستم‌عاملی که در حال اجراست، کامپایل می‌کند
+    # نام فایل خروجی را به صورت واضح بر اساس سیستم‌عامل تعیین می‌کنیم
     - name: Build application
-      run: go build -v -o ./build/ .
-      # خروجی در پوشه build قرار می‌گیرد
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          go build -v -o go-system-fingerprint.exe .
+        else
+          go build -v -o go-system-fingerprint .
+        fi
+      shell: bash
 
-    # مرحله ۵ (اختیاری): آپلود کردن خروجی به عنوان Artifact
+    # مرحله ۵: آپلود کردن خروجی به عنوان Artifact
     # این کار به شما اجازه می‌دهد فایل اجرایی را از صفحه Actions دانلود کنید
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        # نام فایل آپلود شده
+        # نام فایل آپلود شده که شامل نام سیستم‌عامل است
         name: fingerprint-${{ matrix.os }}
-        # مسیر فایلی که باید آپلود شود
-        path: ./build/
+        # مسیر دقیق فایل اجرایی برای آپلود.
+        # در ویندوز، فایل .exe و در لینوکس، فایل بدون پسوند آپلود می‌شود.
+        path: |
+          go-system-fingerprint.exe
+          go-system-fingerprint
+        # اگر هیچ فایل اجرایی ساخته نشود، این مرحله با خطا مواجه خواهد شد
+        if-no-files-found: error
+
