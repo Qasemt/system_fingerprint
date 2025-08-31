@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🚀 Run And Debug ",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "env": {
+        "APP_ENV": "development"
+      },
+      "program": "${workspaceRoot}/main.go",
+      "cwd": "${workspaceRoot}",
+      "showLog": false
+    }
+  ]
+}

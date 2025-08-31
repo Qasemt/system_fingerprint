@@ -1,0 +1,57 @@
+# نام Workflow که در تب Actions گیت‌هاب نمایش داده می‌شود
+name: Go Cross-Platform Build
+
+# این Workflow چه زمانی اجرا می‌شود
+on:
+  # با هر پوش (push) به شاخه main
+  push:
+    branches: [ "main" ]
+  # با هر درخواست ادغام (pull request) به شاخه main
+  pull_request:
+    branches: [ "main" ]
+
+# کارهایی (Jobs) که باید انجام شوند
+jobs:
+  # تعریف یک کار به نام build
+  build:
+    # نام استراتژی: اجرای این کار برای چند پلتفرم مختلف
+    strategy:
+      # تعریف یک ماتریس برای سیستم‌عامل‌ها
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    # مشخص کردن ماشینی که این کار روی آن اجرا می‌شود (بر اساس ماتریس بالا)
+    runs-on: ${{ matrix.os }}
+
+    # مراحل اجرای کار
+    steps:
+    # مرحله ۱: دریافت کد از ریپازیتوری
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # مرحله ۲: نصب و راه‌اندازی محیط Go
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21' # می‌توانید نسخه Go را تغییر دهید
+
+    # مرحله ۳: دانلود و نصب وابستگی‌ها
+    # این دستور پکیج‌ها را بر اساس فایل go.mod دانلود می‌کند
+    - name: Install dependencies
+      run: go mod tidy
+
+    # مرحله ۴: کامپایل (Build) کردن برنامه
+    # این دستور برنامه را برای سیستم‌عاملی که در حال اجراست، کامپایل می‌کند
+    - name: Build application
+      run: go build -v -o ./build/ .
+      # خروجی در پوشه build قرار می‌گیرد
+
+    # مرحله ۵ (اختیاری): آپلود کردن خروجی به عنوان Artifact
+    # این کار به شما اجازه می‌دهد فایل اجرایی را از صفحه Actions دانلود کنید
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        # نام فایل آپلود شده
+        name: fingerprint-${{ matrix.os }}
+        # مسیر فایلی که باید آپلود شود
+        path: ./build/
