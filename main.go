@@ -5,8 +5,8 @@ import (
 )
 
 func main() {
-	fp := getSystemFingerprint()
 
+	fp := getSystemFingerprint()
 	fmt.Println("System Fingerprint:", fp)
 
 }

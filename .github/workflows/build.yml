@@ -50,17 +50,18 @@ jobs:
         fi
       shell: bash
 
-    # مرحله ۵: آپلود کردن خروجی به عنوان Artifact
-    # این کار به شما اجازه می‌دهد فایل اجرایی را از صفحه Actions دانلود کنید
-    - name: Upload artifact
+     - name: Upload artifact (Windows)
+      if: runner.os == 'Windows'
       uses: actions/upload-artifact@v4
       with:
-        # نام فایل آپلود شده که شامل نام سیستم‌عامل است
-        name: fingerprint-${{ matrix.os }}
-        # مسیر دقیق فایل اجرایی برای آپلود.
-        # در ویندوز، فایل .exe و در لینوکس، فایل بدون پسوند آپلود می‌شود.
-        path: |
-          system-fingerprint.exe
-          system-fingerprint
-        # اگر هیچ فایل اجرایی ساخته نشود، این مرحله با خطا مواجه خواهد شد
+        name: fingerprint-windows
+        path: system-fingerprint.exe
+        if-no-files-found: error
+
+    - name: Upload artifact (Linux)
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: fingerprint-linux
+        path: system-fingerprint
         if-no-files-found: error
