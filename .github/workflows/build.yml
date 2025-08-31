@@ -10,15 +10,20 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        # تعیین شل مناسب برای هر OS
+        # تعریف تمام ترکیبات به صورت دستی با include
         include:
           - os: ubuntu-latest
             shell: bash
+            output_name: system-fingerprint
+            goos: linux
+
           - os: windows-latest
             shell: pwsh
+            output_name: system-fingerprint.exe
+            goos: windows
 
     runs-on: ${{ matrix.os }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,18 +39,11 @@ jobs:
       - name: Build application
         shell: ${{ matrix.shell }}
         run: |
-          # در لینوکس (bash)
-          if [ "${{ runner.os }}" == "Linux" ]; then
-            go build -v -o system-fingerprint .
-          else
-            # در ویندوز (PowerShell)
-            go build -v -o system-fingerprint.exe .
-          fi
+          go build -v -o ${{ matrix.output_name }} .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: fingerprint-${{ matrix.os }}
-          path: |
-            system-fingerprint*
+          path: ${{ matrix.output_name }}
           if-no-files-found: error
